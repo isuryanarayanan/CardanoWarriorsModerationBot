@@ -1,4 +1,9 @@
+const GUILD_ID = process.env["DEV_GUILD_ID"]
+
 function dashboardManager(client) {
+	var server = client.guilds.cache.get(GUILD_ID);
+	var channel = server.channels.cache.get(dashboardChannelId);
+
 	// if channel not created create channel
 	//
 	// if created send command list

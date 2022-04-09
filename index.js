@@ -25,37 +25,10 @@ require("dotenv").config();
  *
  * These points are dynamically set by the admin.
  *
- *
- * The Ticketing system
- * __________________________
- *
- * There will be a channel created by the bot and have an embed which the users can interact
- * with. Upon interaction the bot will open a channel with the user, the team and the available
- * moderator at that time. The messages inside this channel is recorded and saved into a mongoDB
- * instance. On closing the channel there will be a prompt for moderator and the users to provide
- * feedback on the experience with each other.
- *
- * There will be also another channel called transcripts which will be only available to the team
- * where the logs are shared.
- *
- *
- * The administration panel
- * __________________________
- *
- * The bot will create a channel called "administration" where the admin commands are accessible
- * for the team. Here the admins can set parameters on which the bot operates on. Here they can
- *
- * - add moderators
- * - set reputation points
- * - see logs
- * - control who has access to the program
- * - reset the program
- *
- *
  */
 
 const { Client, Collection, Intents } = require("discord.js");
-const { rankManager, ticketManager, dashboardManager } = require("./managers");
+const { rankManager, ticketManager, dashboardManager } = require(".utils/managers");
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 const fs = require("fs");
 
