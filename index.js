@@ -28,7 +28,7 @@ require("dotenv").config();
  */
 
 const { Client, Collection, Intents } = require("discord.js");
-const { rankManager, ticketManager, dashboardManager } = require(".utils/managers");
+const { rankManager, ticketManager, dashboardManager } = require("./utils/managers");
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 const fs = require("fs");
 
