@@ -44,7 +44,97 @@ async function dbSaveSettings(content) {
     await dbClient
       .db("cwmoderationbot")
       .collection("settings")
-      .updateOne({ tag: "settings" }, { $set: {} });
+      .updateOne({ tag: "settings" }, { $set: content });
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await dbClient.close();
+  }
+}
+
+async function dbSaveModerator(content) {
+  var dbClient = await dbConnect();
+  try {
+    await dbClient.connect();
+    await dbClient
+      .db("cwmoderationbot")
+      .collection("moderators")
+      .insertOne(content);
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await dbClient.close();
+  }
+}
+
+async function dbRemoveModerator(content) {
+  var dbClient = await dbConnect();
+  try {
+    await dbClient.connect();
+    await dbClient
+      .db("cwmoderationbot")
+      .collection("moderators")
+      .deleteOne(content);
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await dbClient.close();
+  }
+}
+
+async function dbSaveTicket(content) {
+  var dbClient = await dbConnect();
+  try {
+    await dbClient.connect();
+    await dbClient
+      .db("cwmoderationbot")
+      .collection("tickets")
+      .insertOne(content);
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await dbClient.close();
+  }
+}
+
+async function dbSaveUser(content) {
+  var dbClient = await dbConnect();
+  try {
+    await dbClient.connect();
+    await dbClient
+      .db("cwmoderationbot")
+			.collection("users")
+      .insertOne(content);
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await dbClient.close();
+  }
+}
+
+async function dbUpdateUser(content) {
+  var dbClient = await dbConnect();
+  try {
+    await dbClient.connect();
+    await dbClient
+      .db("cwmoderationbot")
+			.collection("users")
+      .updateOne(content);
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await dbClient.close();
+  }
+}
+
+async function dbRemoveUser(content) {
+  var dbClient = await dbConnect();
+  try {
+    await dbClient.connect();
+    await dbClient
+      .db("cwmoderationbot")
+			.collection("users")
+      .deleteOne(content);
   } catch (e) {
     console.error(e);
   } finally {
@@ -55,5 +145,11 @@ async function dbSaveSettings(content) {
 module.exports = {
   dbConnect,
   dbSaveSettings,
-	dbGet
+  dbGet,
+  dbSaveModerator,
+  dbRemoveModerator,
+	dbSaveUser,
+	dbUpdateUser,
+	dbRemoveUser,
+  dbSaveTicket,
 };

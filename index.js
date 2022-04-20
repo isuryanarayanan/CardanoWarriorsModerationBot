@@ -28,7 +28,9 @@ require("dotenv").config();
  */
 
 const { Client, Collection, Intents } = require("discord.js");
-const { rankManager, ticketManager, dashboardManager } = require("./utils/managers");
+const { manage, ticketManager } = require("./utils/managers");
+const { setup } = require("./setup/index");
+const { publishCommands } = require("./utils/publishCommands");
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 const fs = require("fs");
 
@@ -49,14 +51,15 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command);
 }
 
-client.once("ready", () => {
+client.once("ready", async () => {
   client.user.setActivity("/help");
 
-	dashboardManager(client);
-  ticketManager(client);
-	rankManager(client);
+  await publishCommands();
 
-  console.log("Ready");
+  setup(client);
+  manage(client);
+
+  console.log("Connection to bot established, running executables ..");
 });
 
 client.on("interactionCreate", async (interaction) => {
@@ -71,6 +74,26 @@ client.on("interactionCreate", async (interaction) => {
   } catch (error) {
     console.log(error);
     await interaction.editReply("Uh. oh!");
+  }
+});
+
+client.on("interactionCreate", async (interaction) => {
+  if (!interaction.isButton()) return;
+
+  if (interaction.customId == "ticket_open") {
+
+		try {
+			await ticketManager(interaction)
+		} catch (error) {
+			console.log(error)
+			await interaction.editReply("Uh. oh!")
+		}
+    
+  } else {
+    await interaction.reply({
+			content: "Uh. oh! Interaction not valid.",
+      ephemeral: true,
+    });
   }
 });
 
