@@ -112,14 +112,14 @@ async function dbSaveUser(content) {
   }
 }
 
-async function dbUpdateUser(content) {
+async function dbUpdateUser(query,content) {
   var dbClient = await dbConnect();
   try {
     await dbClient.connect();
     await dbClient
       .db("cwmoderationbot")
 			.collection("users")
-      .updateOne(content);
+			.updateOne(query,{$set:content});
   } catch (e) {
     console.error(e);
   } finally {

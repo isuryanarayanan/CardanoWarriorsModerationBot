@@ -26,6 +26,7 @@ async function ticketManager(interaction) {
     ephemeral: true,
   });
 
+  // Checking if user is eligible to use ticket service
   var users = await dbGet({
     collection: "users",
     find: { user_id: interaction.user.id, banned: true },
@@ -37,6 +38,7 @@ async function ticketManager(interaction) {
       ephemeral: true,
     });
   } else {
+    // Creating the ticket
     var ticket = {
       opener: interaction.user.id,
       ticket_tag: createTag(),
@@ -66,9 +68,6 @@ async function ticketManager(interaction) {
           user_id: interaction.user.id,
         },
         {
-          user_id: existing_user[0].user_id,
-          user: existing_user[0].user,
-          banned: false,
           tickets: existing_user[0].tickets.concat([ticket]),
         }
       );
