@@ -28,7 +28,9 @@ require("dotenv").config();
  */
 
 const { Client, Collection, Intents } = require("discord.js");
-const { manage, ticketManager } = require("./utils/managers");
+const { ticketManager } = require("./utils/managers");
+const { createTicket } = require("./buttons/create")
+const { manage } = require("./manage/index");
 const { setup } = require("./setup/index");
 const { publishCommands } = require("./utils/publishCommands");
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
@@ -56,7 +58,7 @@ client.once("ready", async () => {
 
   await publishCommands();
 
-  setup(client);
+  await setup(client);
   manage(client);
 
   console.log("Connection to bot established, running executables ..");
@@ -83,7 +85,7 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.customId == "ticket_open") {
 
 		try {
-			await ticketManager(interaction)
+			await createTicket(interaction)
 		} catch (error) {
 			console.log(error)
 			await interaction.editReply("Uh. oh!")

@@ -5,9 +5,7 @@ const {
   dbUpdateUser,
   dbSaveUser,
   dbRemoveUser,
-} = require("./db");
-
-async function manage(client) {}
+} = require("../utils/db");
 
 function createTag() {
   var tag = Math.floor(Math.random() * (10000 - 9 + 1) + 9);
@@ -20,7 +18,7 @@ function createTag() {
   return tag;
 }
 
-async function ticketManager(interaction) {
+async function createTicket(interaction) {
   await interaction.reply({
     content: "Creating ticket ..",
     ephemeral: true,
@@ -39,12 +37,14 @@ async function ticketManager(interaction) {
     });
   } else {
     // Creating the ticket
+    const d = new Date();
     var ticket = {
       opener: interaction.user.id,
       ticket_tag: createTag(),
-      time: 0,
+      time: d.getUTCHours(),
       channel: undefined,
       moderators: [],
+      available_moderators: [],
       logs: "",
       closed: false,
       close_note: "",
@@ -83,6 +83,5 @@ async function ticketManager(interaction) {
 }
 
 module.exports = {
-  ticketManager,
-  manage,
+	createTicket,
 };

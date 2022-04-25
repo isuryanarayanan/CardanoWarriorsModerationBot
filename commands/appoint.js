@@ -48,7 +48,7 @@ module.exports = {
           user_id: interaction.options.getUser("moderator").id,
           user: interaction.options.getUser("moderator"),
           start: interaction.options.getInteger("start"),
-          stop: interaction.options.getInteger("start"),
+					stop: interaction.options.getInteger("stop"),
           role: interaction.options.getString("role"),
         });
         await interaction.editReply("Moderator added to program");
