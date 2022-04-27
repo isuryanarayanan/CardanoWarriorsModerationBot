@@ -28,7 +28,6 @@ require("dotenv").config();
  */
 
 const { Client, Collection, Intents } = require("discord.js");
-const { ticketManager } = require("./utils/managers");
 const { createTicket } = require("./buttons/create")
 const { manage } = require("./manage/index");
 const { setup } = require("./setup/index");

@@ -97,6 +97,21 @@ async function dbSaveTicket(content) {
   }
 }
 
+async function dbUpdateTicket(query,content) {
+  var dbClient = await dbConnect();
+  try {
+    await dbClient.connect();
+    await dbClient
+      .db("cwmoderationbot")
+			.collection("tickets")
+			.updateOne(query,{$set:content});
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await dbClient.close();
+  }
+}
+
 async function dbSaveUser(content) {
   var dbClient = await dbConnect();
   try {
@@ -152,4 +167,5 @@ module.exports = {
 	dbUpdateUser,
 	dbRemoveUser,
   dbSaveTicket,
+	dbUpdateTicket
 };
