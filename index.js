@@ -28,7 +28,8 @@ require("dotenv").config();
  */
 
 const { Client, Collection, Intents } = require("discord.js");
-const { createTicket } = require("./buttons/create")
+const { createTicket } = require("./buttons/create");
+const { closeTicket } = require("./buttons/close");
 const { manage } = require("./manage/index");
 const { setup } = require("./setup/index");
 const { publishCommands } = require("./utils/publishCommands");
@@ -82,17 +83,22 @@ client.on("interactionCreate", async (interaction) => {
   if (!interaction.isButton()) return;
 
   if (interaction.customId == "ticket_open") {
-
-		try {
-			await createTicket(interaction)
-		} catch (error) {
-			console.log(error)
-			await interaction.editReply("Uh. oh!")
-		}
-    
+    try {
+      await createTicket(interaction);
+    } catch (error) {
+      console.log(error);
+      await interaction.editReply("Uh. oh!");
+    }
+  } else if (interaction.customId == "ticket_close") {
+    try {
+      await closeTicket(interaction);
+    } catch (error) {
+      console.log(error);
+      await interaction.editReply("Uh. oh!");
+    }
   } else {
     await interaction.reply({
-			content: "Uh. oh! Interaction not valid.",
+      content: "Uh. oh! Interaction not valid.",
       ephemeral: true,
     });
   }

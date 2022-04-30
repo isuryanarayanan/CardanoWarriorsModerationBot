@@ -1,20 +1,7 @@
 const GUILD_ID = process.env["DEV_GUILD_ID"];
+const CLIENT_ID = process.env["DEV_CLIENT_ID"];
 const { dbGet, dbUpdateTicket } = require("../utils/db");
-
-function timeAgo(date) {
-  const intervals = [
-    { label: "year", seconds: 31536000 },
-    { label: "month", seconds: 2592000 },
-    { label: "day", seconds: 86400 },
-    { label: "hour", seconds: 3600 },
-    { label: "minute", seconds: 60 },
-    { label: "second", seconds: 1 },
-  ];
-  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-  const interval = intervals.find((i) => i.seconds < seconds);
-  const count = Math.floor(seconds / interval.seconds);
-  return `${count} ${interval.label}${count !== 1 ? "s" : ""} ago`;
-}
+const { MessageActionRow, MessageButton, MessageEmbed } = require("discord.js");
 
 async function ticketManager(client) {
   var server = client.guilds.cache.get(GUILD_ID);
@@ -26,60 +13,124 @@ async function ticketManager(client) {
     collection: "settings",
     find: { tag: "settings" },
   });
+
   for (var i = 0; i < tickets.length; i++) {
     if (tickets[i].closed) {
-			// Ticket is closed
-			//
-      // Check if channel is deleted else delete it.
+      // If ticket is closed in database
       if (tickets[i].channel != undefined) {
-        var channel = await server.channels.cache.get(tickets[i].channel);
-        if (channel != undefined) {
-          // Delete channel
-          channel.delete();
+        // If the database still have the channel id
+        var server_channel = await server.channels.cache.get(
+          tickets[i].channel
+        ); // find that channel using the id
+        if (server_channel != undefined) {
+          server_channel.delete(); // Then delete it
         }
-        // update ticket
+        // And update the database
         await dbUpdateTicket(
-          { tag: tickets[i].ticket_tag },
+          { ticket_tag: tickets[i].ticket_tag },
           { channel: undefined }
         );
       }
-
-			// Send logs to transcripts channel
     } else {
-			// Ticket is still open 
+      // Check if channel is created
+      if (tickets[i].channel != undefined) {
+        var server_channel = await server.channels.cache.get(
+          tickets[i].channel
+        ); // find that channel using the id
+      }
 
-      // check if tickets should be closed by expiry
-      var time_delay = (new Date() - tickets[i].date) / (1000 * 60 * 60);
-      if (time_delay > 24.0) {
-        await dbUpdateTicket(
-					{ ticket_tag: tickets[i].ticket_tag },
-          { closed: true, close_note: "Time expired" }
+      if (server_channel == undefined || tickets[i].channel == undefined) {
+        // If neither the channel in database is found or nonexistent
+        // create new channel and update db
+        var ticket_channel = await server.channels.create(
+          "ticket-" + tickets[i].ticket_tag,
+          {
+            reason: "ticket open channel",
+          }
         );
-      } else {
-        // Create channel for the ticket
-        if (tickets[i].channel == undefined) {
-          ticket_channel = await server.channels.create(
-            "ticket-" + tickets[i].ticket_tag,
-            {
-              reason: "ticket open channel",
-            }
-          );
-          // Save new category into database
-          await dbUpdateTicket(
-            {
-              ticket_tag: tickets[i].ticket_tag,
-            },
-            {
-              channel: ticket_channel.id,
-            }
-          );
-          ticket_channel.setParent(settings[0].category_ticket);
+        // Save new category into database
+        await dbUpdateTicket(
+          {
+            ticket_tag: tickets[i].ticket_tag,
+          },
+          {
+            channel: ticket_channel.id,
+          }
+        );
+        ticket_channel.setParent(settings[0].category_ticket);
+        server_channel = ticket_channel;
+      }
+
+      if (server_channel != undefined) {
+        var message = undefined;
+
+        if (tickets[i].channel_message != undefined) {
+          await server_channel.messages
+            .fetch(tickets[i].channel_message)
+            .then((data) => {
+              message = data;
+            })
+            .catch((err) => {
+              if (err.message == "Unknown Message") {
+                console.log(
+                  "Ticket#" +
+                    tickets[i].ticket_tag +
+                    " : message not found, sending one..."
+                );
+              }
+            });
+        } else {
+          await server_channel.messages
+            .fetch()
+            .then((data) => {
+              data.forEach((e) => {
+                if (e.author.id == CLIENT_ID) {
+                  message = e;
+                }
+              });
+            })
+            .catch((err) => {
+              console.log(err);
+            });
         }
 
-				// Send channel message
-				if(tickets[i].channel_message == undefined){
+        if (!message) {
+          const tickets_embed = new MessageEmbed();
 
-				}
+          tickets_embed
+            .setColor("#0099ff")
+            .setDescription("Ticket created for @!suryan")
+            .setTitle("Ticket#" + tickets[i].ticket_tag)
+            .setTimestamp()
+            .setFooter({ text: "Bot by !suryan" });
+
+          const tickets_buttons = new MessageActionRow()
+            .addComponents(
+              new MessageButton()
+                .setCustomId("ticket_close")
+                .setLabel("Close")
+                .setStyle("SUCCESS")
+                .setEmoji("🎟")
+            )
+            .addComponents(
+              new MessageButton()
+                .setCustomId("moderation_apply")
+                .setLabel("Claim")
+                .setStyle("PRIMARY")
+                .setEmoji("👷")
+            );
+
+          message = await server_channel.send({
+            embeds: [tickets_embed],
+            components: [tickets_buttons],
+          });
+          await dbUpdateTicket(
+            { ticket_tag: tickets[i].ticket_tag },
+            {
+              channel_message: message.id,
+            }
+          );
+        }
       }
     }
   }
