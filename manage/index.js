@@ -13,7 +13,7 @@ async function manage(client) {
   setInterval(async () => {
 		setup(client);
     ticketManager(client);
-	}, 120000);
+	}, 10000);
 }
 module.exports = {
   manage,

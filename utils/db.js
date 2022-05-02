@@ -97,14 +97,14 @@ async function dbSaveTicket(content) {
   }
 }
 
-async function dbUpdateTicket(query,content) {
+async function dbUpdateTicket(query, content) {
   var dbClient = await dbConnect();
   try {
     await dbClient.connect();
     await dbClient
       .db("cwmoderationbot")
-			.collection("tickets")
-			.updateOne(query,{$set:content});
+      .collection("tickets")
+      .updateOne(query, { $set: content });
   } catch (e) {
     console.error(e);
   } finally {
@@ -116,10 +116,7 @@ async function dbSaveUser(content) {
   var dbClient = await dbConnect();
   try {
     await dbClient.connect();
-    await dbClient
-      .db("cwmoderationbot")
-			.collection("users")
-      .insertOne(content);
+    await dbClient.db("cwmoderationbot").collection("users").insertOne(content);
   } catch (e) {
     console.error(e);
   } finally {
@@ -127,14 +124,14 @@ async function dbSaveUser(content) {
   }
 }
 
-async function dbUpdateUser(query,content) {
+async function dbUpdateUser(query, content) {
   var dbClient = await dbConnect();
   try {
     await dbClient.connect();
     await dbClient
       .db("cwmoderationbot")
-			.collection("users")
-			.updateOne(query,{$set:content});
+      .collection("users")
+      .updateOne(query, { $set: content });
   } catch (e) {
     console.error(e);
   } finally {
@@ -146,10 +143,22 @@ async function dbRemoveUser(content) {
   var dbClient = await dbConnect();
   try {
     await dbClient.connect();
+    await dbClient.db("cwmoderationbot").collection("users").deleteOne(content);
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await dbClient.close();
+  }
+}
+
+async function dbAddLog(content) {
+  var dbClient = await dbConnect();
+  try {
+    await dbClient.connect();
     await dbClient
       .db("cwmoderationbot")
-			.collection("users")
-      .deleteOne(content);
+      .collection("logs-" + content.ticket_tag)
+      .insertOne(content);
   } catch (e) {
     console.error(e);
   } finally {
@@ -163,9 +172,10 @@ module.exports = {
   dbGet,
   dbSaveModerator,
   dbRemoveModerator,
-	dbSaveUser,
-	dbUpdateUser,
-	dbRemoveUser,
+  dbSaveUser,
+  dbUpdateUser,
+  dbRemoveUser,
   dbSaveTicket,
-	dbUpdateTicket
+  dbUpdateTicket,
+  dbAddLog,
 };

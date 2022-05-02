@@ -1,4 +1,5 @@
 require("dotenv").config();
+
 /*
  *
  * The CardanoWarriors discord community moderation bot
@@ -31,9 +32,12 @@ const { Client, Collection, Intents } = require("discord.js");
 const { createTicket } = require("./buttons/create");
 const { closeTicket } = require("./buttons/close");
 const { manage } = require("./manage/index");
+const { logsManager } = require("./manage/logsManager");
 const { setup } = require("./setup/index");
 const { publishCommands } = require("./utils/publishCommands");
-const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+const client = new Client({
+  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+});
 const fs = require("fs");
 
 const GUILD_ID = process.env["DEV_GUILD_ID"];
@@ -62,6 +66,14 @@ client.once("ready", async () => {
   manage(client);
 
   console.log("Connection to bot established, running executables ..");
+});
+
+client.on("messageCreate", (message) => {
+  var server = client.guilds.cache.get(GUILD_ID);
+  var message_channel = server.channels.cache.get(message.channelId);
+  if (message_channel.name.startsWith("ticket-")) {
+    logsManager(message, message_channel);
+  }
 });
 
 client.on("interactionCreate", async (interaction) => {

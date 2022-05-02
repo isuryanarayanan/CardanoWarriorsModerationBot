@@ -99,7 +99,7 @@ async function createTicket(interaction) {
       channel_message: undefined,
       moderators: [],
       available_moderators: [],
-      logs: "",
+			logs: 'logs-',
       closed: false,
       close_note: "",
     };

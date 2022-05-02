@@ -32,105 +32,14 @@ async function ticketManager(client) {
         );
       }
     } else {
-      // Check if channel is created
-      if (tickets[i].channel != undefined) {
-        var server_channel = await server.channels.cache.get(
-          tickets[i].channel
-        ); // find that channel using the id
-      }
+      // Update the server if the channel is deleted
+      var server_channel = await server.channels.cache.get(tickets[i].channel);
 
-      if (server_channel == undefined || tickets[i].channel == undefined) {
-        // If neither the channel in database is found or nonexistent
-        // create new channel and update db
-        var ticket_channel = await server.channels.create(
-          "ticket-" + tickets[i].ticket_tag,
-          {
-            reason: "ticket open channel",
-          }
-        );
-        // Save new category into database
+      if (server_channel == undefined) {
         await dbUpdateTicket(
-          {
-            ticket_tag: tickets[i].ticket_tag,
-          },
-          {
-            channel: ticket_channel.id,
-          }
+          { ticket_tag: tickets[i].ticket_tag },
+          { closed: true, close_note: "channel deleted" }
         );
-        ticket_channel.setParent(settings[0].category_ticket);
-        server_channel = ticket_channel;
-      }
-
-      if (server_channel != undefined) {
-        var message = undefined;
-
-        if (tickets[i].channel_message != undefined) {
-          await server_channel.messages
-            .fetch(tickets[i].channel_message)
-            .then((data) => {
-              message = data;
-            })
-            .catch((err) => {
-              if (err.message == "Unknown Message") {
-                console.log(
-                  "Ticket#" +
-                    tickets[i].ticket_tag +
-                    " : message not found, sending one..."
-                );
-              }
-            });
-        } else {
-          await server_channel.messages
-            .fetch()
-            .then((data) => {
-              data.forEach((e) => {
-                if (e.author.id == CLIENT_ID) {
-                  message = e;
-                }
-              });
-            })
-            .catch((err) => {
-              console.log(err);
-            });
-        }
-
-        if (!message) {
-          const tickets_embed = new MessageEmbed();
-
-          tickets_embed
-            .setColor("#0099ff")
-            .setDescription("Ticket created for @!suryan")
-            .setTitle("Ticket#" + tickets[i].ticket_tag)
-            .setTimestamp()
-            .setFooter({ text: "Bot by !suryan" });
-
-          const tickets_buttons = new MessageActionRow()
-            .addComponents(
-              new MessageButton()
-                .setCustomId("ticket_close")
-                .setLabel("Close")
-                .setStyle("SUCCESS")
-                .setEmoji("🎟")
-            )
-            .addComponents(
-              new MessageButton()
-                .setCustomId("moderation_apply")
-                .setLabel("Claim")
-                .setStyle("PRIMARY")
-                .setEmoji("👷")
-            );
-
-          message = await server_channel.send({
-            embeds: [tickets_embed],
-            components: [tickets_buttons],
-          });
-          await dbUpdateTicket(
-            { ticket_tag: tickets[i].ticket_tag },
-            {
-              channel_message: message.id,
-            }
-          );
-        }
       }
     }
   }
