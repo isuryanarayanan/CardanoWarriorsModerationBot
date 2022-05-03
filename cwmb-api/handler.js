@@ -1,7 +1,10 @@
 const serverless = require("serverless-http");
 const express = require("express");
 const app = express();
+const cors = require('cors')
 const { dbGet } = require("./db");
+
+app.use(cors())
 
 app.get("/", async (req, res, next) => {
   var tickets = await dbGet({ collection: "tickets", find: {} });
