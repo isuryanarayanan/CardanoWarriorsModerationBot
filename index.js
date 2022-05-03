@@ -60,14 +60,19 @@ for (const file of commandFiles) {
 client.once("ready", async () => {
   client.user.setActivity("/help");
 
+  // Publishes commands to the bot
   await publishCommands();
 
+  // Sets up the bot
   await setup(client);
+
+  // Manages the state every 5 minutes
   manage(client);
 
   console.log("Connection to bot established, running executables ..");
 });
 
+// Used for ticket channels mainly
 client.on("messageCreate", (message) => {
   var server = client.guilds.cache.get(GUILD_ID);
   var message_channel = server.channels.cache.get(message.channelId);
@@ -76,6 +81,7 @@ client.on("messageCreate", (message) => {
   }
 });
 
+// Slash command interactions
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
 
@@ -91,6 +97,7 @@ client.on("interactionCreate", async (interaction) => {
   }
 });
 
+// Button interactions
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isButton()) return;
 

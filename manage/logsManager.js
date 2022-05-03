@@ -13,7 +13,8 @@ async function logsManager(message, channel) {
     ticket_tag: ticket[0].ticket_tag,
     channel: channel.id,
     content: message.content,
-    author: message.author.id,
+    author: message.author,
+		attachments: message.attachments,
     time: message.createdTimestamp,
   };
 
